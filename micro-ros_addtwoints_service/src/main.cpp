@@ -1,9 +1,10 @@
+// TODO no service reply
+
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
 #include <example_interfaces/srv/add_two_ints.h>
 #include <stdio.h>
 #include <rcl/error_handling.h>
-#include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 #include <std_msgs/msg/int64.h>
@@ -34,7 +35,7 @@ void service_callback(const void * req, void * res){
   example_interfaces__srv__AddTwoInts_Response * res_in = (example_interfaces__srv__AddTwoInts_Response *) res;
 
   printf("Service request value: %d + %d.\n", (int) req_in->a, (int) req_in->b);
-
+  digitalWrite(LED, !digitalRead(LED)); 
   res_in->sum = req_in->a + req_in->b;
 }
 
@@ -57,6 +58,9 @@ void setup() {
   //create init_options
   RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
 
+  // create init_options
+  // RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
+
   // create node
   RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_node", "", &support));
 
@@ -74,12 +78,12 @@ void setup() {
     &service, 
     &req, 
     &res, 
-    service_callback));
+    &service_callback));
 }
 
 
 void loop() {
-  digitalWrite(LED, !digitalRead(LED)); 
+  
   delay(100);
   RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
 }
